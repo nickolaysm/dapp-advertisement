@@ -8,6 +8,7 @@ interface token {
     //mapping (address => uint256) public balanceOf;
     function balanceOf(address who) constant public returns (uint256);
     function transfer(address receiver, uint amount) public;
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success);
 }
 
 contract TestTokenWork {
@@ -21,12 +22,20 @@ contract TestTokenWork {
 		tokenReward = token(addressOfToken);
 	}
 	
-	function setTokenAddress(address addressOfToken) public{
-	    addressOfTokenUsedAsReward = addressOfToken;
+	// function setTokenAddress(address addressOfToken) public{
+	//     addressOfTokenUsedAsReward = addressOfToken;
+	// }
+
+	function setOrder(uint256 amount) public payable {
+		tokenReward.transferFrom(msg.sender, this, amount);		
 	}
 
 	function getBalance(address addr) public constant returns (uint256){
 		return tokenReward.balanceOf(addr);
+	}
+
+	function selfBalance() public constant returns (uint256){
+		return this.balance;
 	}
 
 }
