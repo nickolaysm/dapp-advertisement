@@ -177,6 +177,16 @@ contract TokenERC20 {
 /*       ADVANCED TOKEN STARTS HERE       */
 /******************************************/
 
+interface AdvTokenRecipient { 
+    function receiveAdvApproval(address _from, uint256 _value, address _token,      
+        //Текст рекламы для текстовых блоков
+        string _adv_text,
+        //Ссылка на внешний урл с рекламным роликом
+        string _adv_url,
+        //Один из возможных типов контракта 
+        uint _adv_contract_type) public; 
+}
+
 contract MyAdvancedToken is owned, TokenERC20 {
 
     uint256 public sellPrice;
@@ -245,5 +255,29 @@ contract MyAdvancedToken is owned, TokenERC20 {
         _transfer(msg.sender, this, amount);              // makes the transfers
         msg.sender.transfer(amount * sellPrice);          // sends ether to the seller. It's important to do this last to avoid recursion attacks
     }
+
+    /** Метод сделан по аналогии с approveAndCall, но с нормальными параметрами
+     *
+     * @param _spender The address authorized to spend
+     * @param _value the max amount they can spend
+     * @param _adv_text Текст рекламы для текстовых блоков
+     * @param _adv_url Ссылка на внешний урл с рекламным роликом
+     * @param _adv_contract_type Один из возможных типов контракта 
+     *
+     */
+    function approveAndCallAdv(address _spender, uint256 _value, 
+        string _adv_text,
+        string _adv_url,
+        uint _adv_contract_type
+        )
+        public
+        returns (bool success) {
+        AdvTokenRecipient spender = AdvTokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveAdvApproval(msg.sender, _value, this, _adv_text, _adv_url, _adv_contract_type);
+            return true;
+        }
+    }
+
 }
 

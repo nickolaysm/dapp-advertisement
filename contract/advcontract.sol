@@ -1,3 +1,12 @@
+pragma solidity ^0.4.16;
+
+interface token {
+    //mapping (address => uint256) public balanceOf;
+    function balanceOf(address who) constant public returns (uint256);
+    function transfer(address receiver, uint amount) public;
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success);
+}
+
 /**
 * Контракт для: 
 * заказа рекламы, 
@@ -8,6 +17,11 @@
 */
 
 contract ADV_Automatization {
+
+	address public tokenContract;
+	address public owner;
+
+	event SetNewAdv(address _from, string _adv_text);
 
 	/**
 	* Информация об устройстве умеющем показывать рекламу
@@ -45,10 +59,25 @@ contract ADV_Automatization {
 	*/
 	AdvInfo[] public advertisement;
 
+	function ADV_Automatization(address _token) public{
+		tokenContract = _token;
+		owner = msg.sender;
+	}
+
 	/**
 	* Функция заказа рекламы, оплачиваемая
 	*/
-	function advBooking(adv_text) payable {
-	}
+    function receiveAdvApproval(address _from, uint256 _value, address _token,      
+        //Текст рекламы для текстовых блоков
+        string _adv_text,
+        //Ссылка на внешний урл с рекламным роликом/картинкой
+        string _adv_url,
+        //Один из возможных типов контракта 
+        uint _adv_contract_type) public{
 
+		require(_token == tokenContract);
+		require(token(tokenContract).transferFrom(_from, address(this), _value));
+
+		advertisement.push(AdvInfo(_from, _adv_text, _adv_url, _adv_contract_type));		
+    }
 }

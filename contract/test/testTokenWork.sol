@@ -11,15 +11,40 @@ interface token {
     function transferFrom(address _from, address _to, uint256 _value) public returns (bool success);
 }
 
-contract TestTokenWork {
-
-	address public owner;
-    address public addressOfTokenUsedAsReward;
+contract TokenRecipient{
     token tokenReward;
 
-	function TestTokenWork(address addressOfToken) public {
-		owner = msg.sender;
+	function TokenRecipient(address addressOfToken) public {
 		tokenReward = token(addressOfToken);
+	}
+
+	function receiveApproval(address _sender,
+	                         uint256 _value,
+	                         token _tokenContract,
+	                         bytes _extraData) {
+		require(_tokenContract == tokenReward);
+		require(tokenContract.transferFrom(_sender, address(this), 1));
+		uint256 payloadSize;
+		uint256 payload;
+		assembly {
+			payloadSize := mload(_extraData)
+			payload := mload(add(_extraData, 0x20))
+		}
+		payload = payload >> 8*(32 - payloadSize);
+		info[sender] = payload;
+	}
+}
+
+contract TestTokenWork is TokenRecipient{
+
+	address public owner;
+    //address public addressOfTokenUsedAsReward;
+    //token tokenReward;
+
+	//function TestTokenWork(address addressOfToken) public {
+	function TestTokenWork() public {
+		owner = msg.sender;
+		//tokenReward = token(addressOfToken);
 	}
 	
 	// function setTokenAddress(address addressOfToken) public{
